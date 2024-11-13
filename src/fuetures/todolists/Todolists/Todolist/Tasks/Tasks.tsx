@@ -1,39 +1,41 @@
-import List from "@mui/material/List";
-import {ChangeEvent} from "react";
-import ListItem from "@mui/material/ListItem";
-import {getListItemSx} from "./Todolist.styles";
-import Checkbox from "@mui/material/Checkbox";
-import {EditableSpan} from "./EditableSpan";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {useAppSelector} from "./app/hook";
-import {TodolistType} from "./app/App";
-import {Task} from "./Task";
+import { Task } from "./Task/Task";
+import { useAppSelector } from "common/hooks";
+import { TodolistDomainType } from "../../../../../model/todolists-reducer";
+import { TaskStatus } from "../../../api";
+import { useEffect } from "react";
+import { useAppDispatch } from "common/hooks";
+import { getTasksTC } from "../../../../../model/tasks-reducer";
 
 type TasksPropsType = {
-    todolist: TodolistType
-}
-export const Tasks = ({todolist}: TasksPropsType) => {
-    const tasks = useAppSelector(state => state.tasks)
-    const allTodolistTasks = tasks[todolist.id]
-    let tasksForTodolist = allTodolistTasks
+  todolist: TodolistDomainType;
+};
+export const Tasks = ({ todolist }: TasksPropsType) => {
+  const tasks = useAppSelector((state) => state.tasks);
+  const dispatch = useAppDispatch();
+  const allTodolistTasks = tasks[todolist.id] || [];
+  let tasksForTodolist = allTodolistTasks;
+  useEffect(() => {
+    dispatch(getTasksTC(todolist.id));
+  }, []);
 
-    if (todolist.filter === 'active') {
-        tasksForTodolist = allTodolistTasks.filter(task => !task.isDone)
-    }
+  if (todolist.filter === "active") {
+    tasksForTodolist = allTodolistTasks.filter((task) => task.status === TaskStatus.notReady);
+  }
 
-    if (todolist.filter === 'completed') {
-        tasksForTodolist = allTodolistTasks.filter(task => task.isDone)
-    }
-    return (
-        <>
-            {
-                tasksForTodolist.length === 0
-                    ? <p>Тасок нет</p>
-                    : <List>
-                        {tasksForTodolist.map((task) => <Task task={task} todolistId={todolist.id}/>)}
-                    </List>
-            }
-        </>
-    )
-}
+  if (todolist.filter === "completed") {
+    tasksForTodolist = allTodolistTasks.filter((task) => task.status === TaskStatus.done);
+  }
+  return (
+    <>
+      {tasksForTodolist.length === 0 ? (
+        <p>Тасок нет</p>
+      ) : (
+        <div>
+          {tasksForTodolist.map((task) => (
+            <Task task={task} todolistId={todolist.id} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
