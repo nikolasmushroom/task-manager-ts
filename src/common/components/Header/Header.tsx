@@ -12,10 +12,9 @@ export const Header = () => {
           <img src={menuIconImage} alt="burger icon" className={styles.burgerMenuImage}/>
         </div>
         <div className={styles.buttonContainer}>
-          <Button>Login</Button>
-          <Button>Logout</Button>
-          <Button>Faq</Button>
-          <Button>Switch theme</Button>
+          <Button className={styles.button}>Login</Button>
+          <Button className={styles.button}>Logout</Button>
+          <Button className={styles.button}>Faq</Button>
         </div>
       </div>
     </div>
