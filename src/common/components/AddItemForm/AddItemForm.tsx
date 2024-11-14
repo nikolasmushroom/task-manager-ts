@@ -4,10 +4,11 @@ import { Button } from "common/components/Button/Button";
 
 type PropsType = {
   addItem: (title: string) => void;
+  disabled? :boolean
 };
 
-export const AddItemForm = ({ addItem }: PropsType) => {
-  const { title, error, changeItemHandler, addItemOnKeyUpHandler, addItemHandler } = useAddItemForm(addItem);
+export const AddItemForm = ({ addItem, disabled = false }: PropsType) => {
+  const { title, changeItemHandler, addItemOnKeyUpHandler, addItemHandler } = useAddItemForm(addItem);
   return (
     <div>
       <input
@@ -15,8 +16,9 @@ export const AddItemForm = ({ addItem }: PropsType) => {
         value={title}
         onChange={changeItemHandler}
         onKeyUp={addItemOnKeyUpHandler}
+        disabled={disabled}
       />
-      <Button onClick={addItemHandler}>
+      <Button onClick={addItemHandler} disabled={disabled}>
         +
       </Button>
     </div>
