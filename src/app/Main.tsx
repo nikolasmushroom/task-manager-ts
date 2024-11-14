@@ -1,31 +1,33 @@
-import {Grid} from "@mui/material";
-import {AddItemForm} from "./AddItemForm";
-import Paper from "@mui/material/Paper";
-import {Todolist} from "./Todolist";
-import Container from "@mui/material/Container";
+import { AddItemForm } from "common/components"
 import React from "react";
-import {addTodolistAC} from "./model/todolists-reducer";
-
-import {useAppDispatch} from "./app/hook";
-import {Todolists} from "./fuetures/todolists/Todolists/Todolists";
+import { addTodolistTC } from "../model/todolists-reducer"
+import { Todolists } from "../fuetures/todolists/Todolists/Todolists"
+import { useAppDispatch } from "common/hooks"
+import styles from './Main.module.css'
+import { CustomSnackbar } from "common/components/CustomSnackbar";
+import { useSelector } from "react-redux";
+import { RootState } from "./store";
 
 export const Main = () => {
+  const dispatch = useAppDispatch()
+  const error = useSelector<RootState, string|null>(state => state.app.error)
+  const isOpen = error !== null
+  const addTodolist = (title: string) => {
+    const action = addTodolistTC(title)
+    dispatch(action)
+  }
 
-    const dispatch = useAppDispatch()
-
-    const addTodolist = (title: string) => {
-        const action = addTodolistAC(title)
-        dispatch(action)
-    }
-    return (
-        <Container fixed>
-            <Grid container sx={{mb: '30px'}}>
-                <AddItemForm addItem={addTodolist}/>
-            </Grid>
-
-            <Grid container spacing={4}>
-                <Todolists/>
-            </Grid>
-        </Container>
-    )
+  return (
+    <div className={styles.background}>
+      <div className={styles.container}>
+        <div>
+          <AddItemForm addItem={addTodolist} />
+        </div>
+        <div className={styles.todolistContainer}>
+          <Todolists />
+        </div>
+      </div>
+      <CustomSnackbar callBack={() => {}} open={isOpen} autoHideDuration={6000} error={error}/>
+    </div>
+  )
 }
