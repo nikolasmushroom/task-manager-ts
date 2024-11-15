@@ -1,0 +1,11 @@
+button {
+    transition: transform 0.1s, width 0.1s;
+    cursor: pointer;
+}
+button:hover {
+    transform: scaleX(1.07);
+}
+.disabled {
+    background-color: #afabab;
+    opacity: 50%;
+}
