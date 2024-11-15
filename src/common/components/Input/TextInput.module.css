@@ -1,0 +1,26 @@
+.errorAndInputContainer {
+    display: flex;
+    flex-direction: column;
+}
+.input:focus {
+}
+.input {
+    border: 1px solid #525252; /* Добавьте границу для инпута */
+    height: 25px;
+    width: 185px;
+    border-radius: 3px;
+}
+.superInput {
+    border: 1px solid black;
+}
+
+.errorInput {
+    border: 1px solid coral;
+}
+
+.errorInput:focus {
+}
+
+.error {
+    color : coral;
+}
