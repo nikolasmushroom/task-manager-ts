@@ -1,40 +1,42 @@
-import {getListItemSx} from "./Todolist.styles";
-import Checkbox from "@mui/material/Checkbox";
-import {EditableSpan} from "./EditableSpan";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ListItem from "@mui/material/ListItem";
-import {TaskType} from "./app/App";
-import {ChangeEvent} from "react";
-import {useAppDispatch} from "./app/hook";
-import {changeTaskStatusAC, changeTaskTitleAC, removeTaskAC} from "./model/tasks-reducer";
+import { EditableSpan } from "common/components";
+import { ChangeEvent } from "react";
+import { removeTaskTC, updateTaskTC } from "../../../../../../model/tasks-reducer";
+import { useAppDispatch } from "common/hooks";
+import { TaskStatus, TaskType } from "../../../../api";
+import styles from "./Task.module.css";
+import deleteIcon from "./../../../../../../asserts/delete.png";
+import { IconButton } from "common/components/Button/IconButton";
+
 type TaskPropsType = {
-    task: TaskType
-    todolistId: string
+  task: TaskType
+  todolistId: string
 }
-export const Task = ({task, todolistId} : TaskPropsType) => {
-    const dispatch = useAppDispatch()
-    const removeTaskHandler = () => {
-        dispatch(removeTaskAC(task.id, todolistId))
-    }
+export const Task = ({ task, todolistId }: TaskPropsType) => {
+  const dispatch = useAppDispatch();
+  const removeTaskHandler = () => {
+    dispatch(removeTaskTC({ taskId: task.id, todolistId }));
+  };
 
-    const changeTaskStatusHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        const newStatusValue = e.currentTarget.checked
-        dispatch(changeTaskStatusAC(task.id, newStatusValue, todolistId))
-    }
+  const changeTaskStatusHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const status = e.currentTarget.checked ? TaskStatus.done : TaskStatus.notReady;
+    dispatch(updateTaskTC({
+      model: {
+        status
+      }, task
+    }));
+  };
 
-    const changeTaskTitleHandler = (title: string) => {
-        dispatch(changeTaskTitleAC(task.id, title, todolistId))
-    }
-    return (
-        <ListItem sx={getListItemSx(task.isDone)}>
-            <div>
-                <Checkbox checked={task.isDone} onChange={changeTaskStatusHandler}/>
-                <EditableSpan value={task.title} onChange={changeTaskTitleHandler}/>
-            </div>
-            <IconButton onClick={removeTaskHandler}>
-                <DeleteIcon/>
-            </IconButton>
-        </ListItem>
-    )
-}
+  const changeTaskTitleHandler = (title: string) => {
+    dispatch(updateTaskTC({ model: { title }, task }));
+  };
+  const TaskStatusValue = task.status === TaskStatus.done;
+  return (
+    <div className={styles.task}>
+      <div>
+        <input type="checkbox" checked={TaskStatusValue} onChange={changeTaskStatusHandler} />
+        <EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
+      </div>
+      <IconButton iconUrl={deleteIcon} onClick={removeTaskHandler}/>
+    </div>
+  );
+};
