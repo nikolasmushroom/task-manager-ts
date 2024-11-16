@@ -1,0 +1,18 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.page img {
+    width: 400px;
+    height: 230px;
+    padding-top: 250px;
+}
+.page .message {
+    font-family: Bowlby One, sans-serif;
+    font-size: 23px;
+    font-weight: 600;
+    color: #3a3a7c;
+}
