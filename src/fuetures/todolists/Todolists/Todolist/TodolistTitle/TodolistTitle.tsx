@@ -3,10 +3,10 @@ import {
   deleteTodolistTC,
   TodolistDomainType,
   updateTodolistTitleTC
-} from "../../../../../model/todolists-reducer";
+} from "../../../model/todolists-reducer";
 import { useAppDispatch } from "common/hooks"
 import deleteIcon from './../../../../../asserts/delete.png'
-import { Button } from "common/components/Button/Button";
+import { IconButton } from "common/components/Button/IconButton";
 type TodolistTitle = {
   todolist: TodolistDomainType
 }
@@ -21,11 +21,9 @@ export const TodolistTitle = ({ todolist }: TodolistTitle) => {
   return (
     <div className={"todolist-title-container"}>
       <h3>
-        <EditableSpan value={todolist.title} onChange={updateTodolist} />
+        <EditableSpan disabled={todolist.entityStatus === 'loading'} value={todolist.title} onChange={updateTodolist} />
       </h3>
-      <Button onClick={removeTodolist} disabled={todolist.entityStatus === 'loading'}>
-        <img src={deleteIcon} alt="delete icon"/>
-      </Button>
+      <IconButton iconUrl={deleteIcon}  onClick={removeTodolist} disabled={todolist.entityStatus === 'loading'}/>
     </div>
   )
 }
