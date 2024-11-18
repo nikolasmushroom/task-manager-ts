@@ -1,36 +1,72 @@
-import axios from "axios";
+import { baseURL } from "common/instance"
+import { BaseResponse } from "common/types"
 
-export const baseURL = axios.create({
-    withCredentials: true,
-    baseURL: `https://social-network.samuraijs.com/api/1.1`,
-    headers: {
-        Authorization: 'Bearer ' + '898be8e5-e84b-44ba-98d1-88d64eb60f12',
-        'API-KEY': 'fd5f9688-ccfd-40b8-ab09-e5882d839628'
-    }
-})
-export const todolistAPI = {
-    getTodolists() {
-        return baseURL.get(`/todo-lists`, {})
-            .then(res => {
-                return res
-            })
-    },
-    createTodolist(title: string) {
-        baseURL.post('todo-lists', title)
-            .then((response) => {
-                console.log(response.data)
-            })
-    },
-    deleteTodolist(id: string) {
-        baseURL.delete(`todo-lists/${id}`)
-            .then((response) => {
-                console.log(response.data)
-            })
-    },
-    updateTodolist(id: string, title: string) {
-        baseURL.put(`todo-lists/${id}`, {title: title})
-            .then((response) => {
-                console.log(response.data)
-            })
-    },
+export type GetTaskResponse = {
+  totalCount: number
+  error: string
+  items: TaskType[]
+}
+export type TaskType = {
+  description: string | null
+  title: string
+  completed: boolean
+  status: TaskStatus
+  priority: TodoTaskPriority
+  startDate: string
+  deadline: string
+  id: string
+  todoListId: string
+  order: number
+  addedDate: string
+}
+export type UpdateTaskModel = {
+  title: string
+  description: string | null
+  status: number
+  priority: number
+  startDate: string
+  deadline: string
+}
+
+export enum TaskStatus {
+  notReady,
+  part,
+  done,
+}
+export enum ResultCode {
+  Success,
+  Failed,
+}
+export enum TodoTaskPriority {
+  low,
+  middle,
+  height,
+  urgently,
+  later,
+}
+
+export const taskAPI = {
+  getTasks(todolistId: string) {
+    return baseURL.get<GetTaskResponse>(`/todo-lists/${todolistId}/tasks`).then((response) => {
+      return response
+    })
+  },
+  createTask(params: { todolistId: string; title: string }) {
+    const { todolistId, title } = params
+    return baseURL.post<BaseResponse<{ item: TaskType }>>(`/todo-lists/${todolistId}/tasks`, { title: title }, {}).then((response) => {
+      return response
+    })
+  },
+  deleteTask(params: { todolistId: string; taskId: string }) {
+    const { todolistId, taskId } = params
+    return baseURL.delete<BaseResponse>(`/todo-lists/${todolistId}/tasks/${taskId}`).then((response) => {
+      return response
+    })
+  },
+  updateTask(params: { todolistId: string; taskId: string; apiModel: UpdateTaskModel }) {
+    const { todolistId, taskId, apiModel } = params
+    return baseURL.put<BaseResponse<{ item: TaskType }>>(`/todo-lists/${todolistId}/tasks/${taskId}`, apiModel).then((response) => {
+      return response
+    })
+  },
 }
