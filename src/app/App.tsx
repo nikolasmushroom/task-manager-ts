@@ -1,19 +1,30 @@
-import "./App.css"
-import { Header } from "common/components"
-import { useSelector } from "react-redux";
-import { RootState } from "./store";
-import { statusType } from "./app-reducer";
-import { LinearProgress } from "@mui/material";
-import { Outlet } from "react-router-dom";
+import "./App.css";
+import { Header } from "common/components";
+import {LinearProgress } from "@mui/material";
+import {Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "common/hooks";
+import { initializeAppTC } from "../fuetures/auth/model/auth-reducer";
+import { selectIsInitialized } from "../fuetures/auth/model/selectIsInitialized";
+import { Preloader } from "common/components/Preloader/Preloader";
 
 export const App = () => {
-  const status = useSelector<RootState, statusType>(state => state.app.status)
+  const status = useAppSelector(state => state.app.status);
+  const isInitialized = useAppSelector(selectIsInitialized);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(initializeAppTC());
+  }, []);
+
   return (
     <div>
-      <Header />
-      {status === 'loading' && <LinearProgress color={'primary'}/> }
-      <Outlet/>
+      {!isInitialized ? <Preloader/> : <>
+        <Header />
+        {status === "loading" && <LinearProgress color={"primary"} />}
+        <Outlet />
+      </>}
+
     </div>
 
-  )
-}
+  );
+};
