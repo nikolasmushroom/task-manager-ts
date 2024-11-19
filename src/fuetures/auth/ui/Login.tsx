@@ -1,8 +1,13 @@
 import styles from "./Login.module.css";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { TextInput } from "common/components/Input/TextInput";
+import React, { useEffect } from "react";
 import { Button } from "common/components/Button/Button";
-import Checkbox from "@mui/material/Checkbox";
+import { loginTC } from "../model/auth-reducer";
+import { useAppDispatch, useAppSelector } from "common/hooks";
+import { Navigate } from "react-router-dom";
+import { selectIsLoggedIn } from "../model/authSelectors";
+
 
 type Inputs = {
   email: string
@@ -10,23 +15,56 @@ type Inputs = {
   rememberMe: boolean
 }
 export const Login = () => {
+  const dispatch = useAppDispatch();
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("email");
+    const savedPassword = localStorage.getItem("password");
+    const savedRememberMe = localStorage.getItem("rememberMe");
+    if (savedEmail && savedPassword) {
+      setValue("email", savedEmail);
+      setValue("password", savedPassword);
+      setValue("rememberMe", savedRememberMe === "true");
+    }
+  }, []);
   const {
     control,
     register,
     handleSubmit,
-    watch,
-    clearErrors,
+    reset,
+    setValue,
     formState: { errors }
   } = useForm<Inputs>({
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false,
+      rememberMe: false
     },
-    mode: 'onSubmit'
+    mode: "onSubmit"
   });
+  const setDataToLocalStorage = (email: string, password: string, rememberMe: boolean) => {
+    localStorage.setItem("email", email);
+    localStorage.setItem("password", password);
+    localStorage.setItem("rememberMe", JSON.stringify(rememberMe));
+  };
+  const removeDataFromLocalStorage = () => {
+    localStorage.removeItem("email");
+    localStorage.removeItem("password");
+    localStorage.removeItem("rememberMe");
+  };
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    dispatch(loginTC(data));
+    if (data.rememberMe) {
+      setDataToLocalStorage(data.email, data.password, data.rememberMe);
+    } else {
+      removeDataFromLocalStorage();
+    }
+    reset();
+  };
+  if (isLoggedIn) {
+    return <Navigate to={"/"} />;
+  }
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
   return (
     <div className={styles.formContainer}>
       <p>
@@ -48,18 +86,21 @@ export const Login = () => {
           control={control}
           rules={{
             required: true,
-            minLength: { value: 7, message: "Login should have at least 7 symbols" }
+            minLength: { value: 7, message: "Login should have at least 7 symbols" },
+            pattern: {
+              value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+              message: "Incorrect email address"
+            }
           }}
           render={({ field }) => (
             <TextInput
+              error={errors.email?.message}
               {...field}
               placeholder={"Email"}
             />
           )}
         />
-        {errors.email?.message && (
-          <p>{errors.email?.message}</p>
-        )}
+        {errors.email?.message && <div className={styles.errorMessage}>{errors.email?.message}</div>}
         <Controller
           name="password"
           control={control}
@@ -69,25 +110,19 @@ export const Login = () => {
           }}
           render={({ field }) => (
             <TextInput
+              type="password"
+              error={errors.password?.message}
               {...field}
               placeholder={"password"}
             />
           )}
         />
-        {errors.password?.message && (
-          <p>{errors.password?.message}</p>
-        )}
+        {errors.password?.message && <div className={styles.errorMessage}>{errors.password?.message}</div>}
         <div>
-          <Controller
-            name="rememberMe"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Checkbox {...field} />
-                <span>Remember me</span>
-              </div>
-            )}
-          />
+          <div>
+            <input type="checkbox" {...register("rememberMe")} />
+            <span>Remember me</span>
+          </div>
         </div>
         <Button type="submit">Login</Button>
       </form>
