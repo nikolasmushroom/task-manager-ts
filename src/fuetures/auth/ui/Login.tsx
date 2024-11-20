@@ -7,16 +7,21 @@ import { loginTC } from "../model/auth-reducer";
 import { useAppDispatch, useAppSelector } from "common/hooks";
 import { Navigate } from "react-router-dom";
 import { selectIsLoggedIn } from "../model/authSelectors";
+import { CustomSnackbar } from "common/components/CustomSnackbar/CustomSnackbar";
+import { selectCaptchaUrl } from "../model/selectCaptchaUrl";
 
 
 type Inputs = {
   email: string
   password: string
   rememberMe: boolean
+  captcha?: string
 }
 export const Login = () => {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const captchaUrl = useAppSelector(selectCaptchaUrl);
+  const error = useAppSelector(state => state.app.error);
   useEffect(() => {
     const savedEmail = localStorage.getItem("email");
     const savedPassword = localStorage.getItem("password");
@@ -38,7 +43,8 @@ export const Login = () => {
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false
+      rememberMe: false,
+      captcha: ''
     },
     mode: "onSubmit"
   });
@@ -85,7 +91,10 @@ export const Login = () => {
           name="email"
           control={control}
           rules={{
-            required: true,
+            required: {
+              value : true,
+              message : 'Email must be at least 3 characters long'
+            },
             minLength: { value: 7, message: "Login should have at least 7 symbols" },
             pattern: {
               value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
@@ -105,7 +114,10 @@ export const Login = () => {
           name="password"
           control={control}
           rules={{
-            required: true,
+            required: {
+              value : true,
+              message : 'Password must be at least 3 characters long'
+            },
             minLength: { value: 7, message: "Password should have at least 7 symbols" }
           }}
           render={({ field }) => (
@@ -118,6 +130,23 @@ export const Login = () => {
           )}
         />
         {errors.password?.message && <div className={styles.errorMessage}>{errors.password?.message}</div>}
+        {captchaUrl ?
+          <div>
+            <img src={captchaUrl} alt="captcha image" />
+            <Controller
+              name="captcha"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  type="text"
+                  error={errors.captcha?.message}
+                  {...field}
+                  placeholder={"Please, enter symbols from image"}
+                />
+              )}
+            />
+          </div> :
+          ""}
         <div>
           <div>
             <input type="checkbox" {...register("rememberMe")} />
@@ -126,6 +155,7 @@ export const Login = () => {
         </div>
         <Button type="submit">Login</Button>
       </form>
+      <CustomSnackbar open={!!error} error={error} />
     </div>
   );
 };
