@@ -1,32 +1,27 @@
-import {Grid} from "@mui/material";
-import Paper from "@mui/material/Paper";
-import {Todolist} from "./Todolist";
-import React from "react";
-import {addTaskAC} from "./model/tasks-reducer";
-import {useAppDispatch, useAppSelector} from "./app/hook";
+import { Todolist } from "./Todolist/Todolist";
+import React, { useEffect } from "react";
+import { useAppSelector } from "common/hooks";
+import { useAppDispatch } from "common/hooks";
+import { getTodolistTC } from "../model/todolists-reducer";
+import styles from './Todolists.module.css'
 
 export const Todolists = () => {
-    const dispatch = useAppDispatch()
-    const todolists = useAppSelector(state => state.todolists)
-
-    const addTask = (title: string, todolistId: string) => {
-        dispatch(addTaskAC(title, todolistId))
-    }
-    return (
-        <>
-            {todolists.map((tl) => {
-                return (
-                    <Grid key={tl.id}>
-                        <Paper sx={{p: '0 20px 20px 20px'}}>
-                            <Todolist
-                                key={tl.id}
-                                todolist={tl}
-                                addTask={addTask}
-                            />
-                        </Paper>
-                    </Grid>
-                )
-            })}
-        </>
-    )
-}
+  const dispatch = useAppDispatch();
+  const todolists = useAppSelector((state) => state.todolists);
+  useEffect(() => {
+    dispatch(getTodolistTC());
+  }, []);
+  return (
+    <>
+      {todolists.map((tl) => {
+        return (
+          <div key={tl.id}>
+            <div className={styles.todolistItem}>
+              <Todolist key={tl.id} todolist={tl} />
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+};
