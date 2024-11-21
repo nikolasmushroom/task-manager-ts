@@ -6,9 +6,10 @@ import { Button } from "common/components/Button/Button";
 import { loginTC } from "../model/auth-reducer";
 import { useAppDispatch, useAppSelector } from "common/hooks";
 import { Navigate } from "react-router-dom";
-import { selectIsLoggedIn } from "../model/authSelectors";
-import { CustomSnackbar } from "common/components/CustomSnackbar/CustomSnackbar";
-import { selectCaptchaUrl } from "../model/selectCaptchaUrl";
+import { selectCaptchaUrl, selectIsLoggedIn } from "../model/authSelectors";
+import "react-toastify/dist/ReactToastify.css";
+import { ErrorToast } from "common/Toast/ErrorToast";
+
 
 
 type Inputs = {
@@ -44,7 +45,7 @@ export const Login = () => {
       email: "",
       password: "",
       rememberMe: false,
-      captcha: ''
+      captcha: ""
     },
     mode: "onSubmit"
   });
@@ -92,8 +93,8 @@ export const Login = () => {
           control={control}
           rules={{
             required: {
-              value : true,
-              message : 'Email must be at least 3 characters long'
+              value: true,
+              message: "Email must be at least 3 characters long"
             },
             minLength: { value: 7, message: "Login should have at least 7 symbols" },
             pattern: {
@@ -115,8 +116,8 @@ export const Login = () => {
           control={control}
           rules={{
             required: {
-              value : true,
-              message : 'Password must be at least 3 characters long'
+              value: true,
+              message: "Password must be at least 3 characters long"
             },
             minLength: { value: 7, message: "Password should have at least 7 symbols" }
           }}
@@ -154,8 +155,11 @@ export const Login = () => {
           </div>
         </div>
         <Button type="submit">Login</Button>
+        <div>
+          <ErrorToast dispatch={dispatch} error={error}/>
+        </div>
       </form>
-      <CustomSnackbar open={!!error} error={error} />
+
     </div>
   );
 };
