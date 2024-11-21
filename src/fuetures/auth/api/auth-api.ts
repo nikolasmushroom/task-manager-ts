@@ -16,5 +16,8 @@ export const authAPI = {
   },
   authMe() {
     return baseURL.get<BaseResponse<{ id: number; email: string; login: string }>>("/auth/me");
+  },
+  getCaptcha(){
+    return baseURL.get<{url : string}>('/security/get-captcha-url');
   }
 };
