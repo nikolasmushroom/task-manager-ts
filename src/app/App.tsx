@@ -1,15 +1,16 @@
 import "./App.css";
 import { Header } from "common/components";
-import {LinearProgress } from "@mui/material";
-import {Outlet } from "react-router-dom";
+import { LinearProgress } from "@mui/material";
+import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "common/hooks";
 import { initializeAppTC } from "../fuetures/auth/model/auth-reducer";
-import { selectIsInitialized } from "../fuetures/auth/model/selectIsInitialized";
 import { Preloader } from "common/components/Preloader/Preloader";
+import { selectIsInitialized } from "../fuetures/auth/model/authSelectors";
+import { selectAppStatus } from "./model/selectAppError";
 
 export const App = () => {
-  const status = useAppSelector(state => state.app.status);
+  const status = useAppSelector(selectAppStatus);
   const isInitialized = useAppSelector(selectIsInitialized);
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -18,9 +19,16 @@ export const App = () => {
 
   return (
     <div>
-      {!isInitialized ? <Preloader/> : <>
+      {!isInitialized ? <Preloader /> : <>
         <Header />
-        {status === "loading" && <LinearProgress color={"primary"} />}
+        {status === "loading" && <LinearProgress color={"primary"} style={{
+          position: "fixed",
+          top: "30",
+          left: "0",
+          width: "100%",
+          height: "4px",
+          zIndex: '9999'
+        }} />}
         <Outlet />
       </>}
 
