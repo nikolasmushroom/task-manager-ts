@@ -1,20 +1,27 @@
 import { EditableSpan } from "common/components";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { removeTaskTC, updateTaskTC } from "../../../../../../model/tasks-reducer";
 import { useAppDispatch } from "common/hooks";
 import { TaskStatus, TaskType } from "../../../../api";
 import styles from "./Task.module.css";
-import deleteIcon from "./../../../../../../asserts/delete.png";
+import deleteIcon from "../../../../../../asserts/delete.png";
 import { IconButton } from "common/components/Button/IconButton";
+import { handlerServerNetworkError } from "common/utils/error-utils";
 
 type TaskPropsType = {
   task: TaskType
   todolistId: string
+  disabled? : boolean
 }
-export const Task = ({ task, todolistId }: TaskPropsType) => {
+export const Task = ({ task, todolistId , disabled}: TaskPropsType) => {
+  const [isDisabled, setIsDisabled] = useState(false);
   const dispatch = useAppDispatch();
   const removeTaskHandler = () => {
-    dispatch(removeTaskTC({ taskId: task.id, todolistId }));
+    setIsDisabled(true)
+    dispatch(removeTaskTC({ taskId: task.id, todolistId })).catch((e) => {
+      handlerServerNetworkError(e.message, dispatch)
+      setIsDisabled(false)
+    });
   };
 
   const changeTaskStatusHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -33,10 +40,10 @@ export const Task = ({ task, todolistId }: TaskPropsType) => {
   return (
     <div className={styles.task}>
       <div>
-        <input type="checkbox" checked={TaskStatusValue} onChange={changeTaskStatusHandler} />
-        <EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
+        <input disabled={isDisabled || disabled} type="checkbox" checked={TaskStatusValue} onChange={changeTaskStatusHandler} />
+        <EditableSpan disabled={isDisabled || disabled} value={task.title} onChange={changeTaskTitleHandler} />
       </div>
-      <IconButton iconUrl={deleteIcon} onClick={removeTaskHandler}/>
+      <IconButton disabled={isDisabled || disabled} iconUrl={deleteIcon} onClick={removeTaskHandler} />
     </div>
   );
 };
