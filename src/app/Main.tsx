@@ -2,15 +2,14 @@ import { AddItemForm } from "common/components";
 import React from "react";
 import { addTodolistTC } from "../fuetures/todolists/model/todolists-reducer";
 import { Todolists } from "../fuetures/todolists/Todolists/Todolists";
-import { useAppDispatch } from "common/hooks";
+import { useAppDispatch, useAppSelector } from "common/hooks";
 import styles from "./Main.module.css";
-import { CustomSnackbar } from "common/components/CustomSnackbar/CustomSnackbar";
-import { useSelector } from "react-redux";
-import { RootState } from "./store";
+import { ErrorToast } from "common/Toast/ErrorToast";
+import { selectAppError } from "./model/selectAppError";
+
 export const Main = () => {
   const dispatch = useAppDispatch();
-  const error = useSelector<RootState, string | null>(state => state.app.error);
-  const isOpen = error !== null;
+  const error = useAppSelector(selectAppError);
   const addTodolist = (title: string) => {
     const action = addTodolistTC(title);
     dispatch(action);
@@ -25,8 +24,7 @@ export const Main = () => {
           <Todolists />
         </div>
       </div>
-      <CustomSnackbar callBack={() => {
-      }} open={isOpen} autoHideDuration={6000} error={error} />
+      <ErrorToast dispatch={dispatch} error={error}/>
     </div>
 
   );
