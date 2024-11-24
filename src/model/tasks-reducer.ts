@@ -1,7 +1,6 @@
 import {
   AddTodolistActionType,
   RemoveTodolistActionType,
-  setTodolistEntityStatus,
   setTodolistsActionType
 } from "../fuetures/todolists/model/todolists-reducer";
 import {
@@ -102,18 +101,15 @@ export const getTasksTC = (todolistId: string): AppThunk => (dispatch) => {
     })
   ;
 };
-export const removeTaskTC = (args: { taskId: string, todolistId: string }): AppThunk => (dispatch) => {
+export const removeTaskTC = (args: { taskId: string, todolistId: string }): AppThunk<Promise<void>> => async (dispatch) => {
   const { todolistId } = args;
   dispatch(setAppStatusAC("loading"));
-  dispatch(setTodolistEntityStatus({ id: todolistId, status: "loading" }));
-  taskAPI.deleteTask(args).then((response) => {
+   return taskAPI.deleteTask(args).then((response) => {
     if (response.data.resultCode === ResultCode.Success) {
       dispatch(removeTaskAC(args));
       dispatch(setAppStatusAC("succeeded"));
-      dispatch(setTodolistEntityStatus({ id: todolistId, status: "succeeded" }));
     } else {
       handlerServerAppError(response.data, dispatch);
-      dispatch(setTodolistEntityStatus({ id: todolistId, status: "succeeded" }));
     }
   })
     .catch((error) => {
