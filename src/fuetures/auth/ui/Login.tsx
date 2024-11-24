@@ -8,7 +8,8 @@ import { useAppDispatch, useAppSelector } from "common/hooks";
 import { Navigate } from "react-router-dom";
 import { selectCaptchaUrl, selectIsLoggedIn } from "../model/authSelectors";
 import "react-toastify/dist/ReactToastify.css";
-import { ErrorToast } from "common/Toast/ErrorToast";
+import { useToast } from "common/components/Toast/ToastContainer";
+import { setAppErrorAC } from "../../../app/model/app-reducer";
 
 
 
@@ -23,6 +24,11 @@ export const Login = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const captchaUrl = useAppSelector(selectCaptchaUrl);
   const error = useAppSelector(state => state.app.error);
+  const toast = useToast()
+  if(error){
+    toast.error(error, 'left-bottom', () => dispatch(setAppErrorAC(null)))
+  }
+
   useEffect(() => {
     const savedEmail = localStorage.getItem("email");
     const savedPassword = localStorage.getItem("password");
@@ -155,9 +161,6 @@ export const Login = () => {
           </div>
         </div>
         <Button type="submit">Login</Button>
-        <div>
-          <ErrorToast dispatch={dispatch} error={error}/>
-        </div>
       </form>
 
     </div>
