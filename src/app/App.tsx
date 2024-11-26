@@ -10,10 +10,12 @@ import { selectIsInitialized } from "../fuetures/auth/model/authSelectors";
 import { selectAppStatus } from "./model/selectAppError";
 
 
+
 export const App = () => {
   const status = useAppSelector(selectAppStatus);
   const isInitialized = useAppSelector(selectIsInitialized);
   const dispatch = useAppDispatch();
+
   useEffect(() => {
     dispatch(initializeAppTC());
   }, []);
@@ -32,7 +34,6 @@ export const App = () => {
           zIndex: "9999"
         }} />}
         <Outlet />
-
       </>}
     </div>
 
