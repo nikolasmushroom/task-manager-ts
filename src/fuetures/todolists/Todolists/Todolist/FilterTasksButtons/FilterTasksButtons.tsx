@@ -1,5 +1,5 @@
 
-import { changeTodolistFilter, FilterValuesType, TodolistDomainType } from "../../../../../model/todolists-reducer";
+import { changeTodolistFilter, FilterValuesType, TodolistDomainType } from "../../../model/todolists-reducer";
 import { useAppDispatch } from "common/hooks";
 import { Button } from "common/components/Button/Button";
 import styles from './FilterTasksButtons.module.css'
