@@ -3,32 +3,24 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { TextInput } from "common/components/Input/TextInput";
 import React, { useEffect } from "react";
 import { Button } from "common/components/Button/Button";
-import { loginTC } from "../model/auth-reducer";
 import { useAppDispatch, useAppSelector } from "common/hooks";
 import { Navigate } from "react-router-dom";
-import { selectCaptchaUrl, selectIsLoggedIn } from "../model/authSelectors";
 import "react-toastify/dist/ReactToastify.css";
-import { useToast } from "common/components/Toast/ToastContainer";
-import { setAppErrorAC } from "../../../app/model/app-reducer";
+import {
+  selectCaptchaUrl,
+  selectIsLoggedIn,
+  setIsLoggedIn
+} from "../../../app/model/appSlice";
+import { LoginParams, useLoginMutation } from "../api/auth-api";
+
+import { ResultCode } from "common/enums/resultCodeEnum";
 
 
-
-type Inputs = {
-  email: string
-  password: string
-  rememberMe: boolean
-  captcha?: string
-}
 export const Login = () => {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const captchaUrl = useAppSelector(selectCaptchaUrl);
-  const error = useAppSelector(state => state.app.error);
-  const toast = useToast()
-  if(error){
-    toast.error(error, 'left-bottom', () => dispatch(setAppErrorAC(null)))
-  }
-
+  const [login] = useLoginMutation();
   useEffect(() => {
     const savedEmail = localStorage.getItem("email");
     const savedPassword = localStorage.getItem("password");
@@ -46,7 +38,7 @@ export const Login = () => {
     reset,
     setValue,
     formState: { errors }
-  } = useForm<Inputs>({
+  } = useForm<LoginParams>({
     defaultValues: {
       email: "",
       password: "",
@@ -65,14 +57,19 @@ export const Login = () => {
     localStorage.removeItem("password");
     localStorage.removeItem("rememberMe");
   };
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    dispatch(loginTC(data));
-    if (data.rememberMe) {
-      setDataToLocalStorage(data.email, data.password, data.rememberMe);
-    } else {
-      removeDataFromLocalStorage();
-    }
-    reset();
+  const onSubmit: SubmitHandler<LoginParams> = (data) => {
+    login(data).then(result => {
+      if (result.data?.resultCode === ResultCode.Success) {
+        localStorage.setItem("sn-token", result.data.data.token);
+        dispatch(setIsLoggedIn({ isLoggedIn: true }));
+        if (data.rememberMe) {
+          setDataToLocalStorage(data.email, data.password, data.rememberMe);
+        }
+      } else {
+        removeDataFromLocalStorage();
+      }
+      reset();
+    });
   };
   if (isLoggedIn) {
     return <Navigate to={"/"} />;
