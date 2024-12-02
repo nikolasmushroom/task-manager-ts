@@ -1,38 +1,42 @@
 import "./App.css";
-import { Header, Toast } from "common/components";
-import { LinearProgress } from "@mui/material";
+import { Header } from "common/components";
 import { Outlet } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "common/hooks";
-import { initializeAppTC } from "../fuetures/auth/model/auth-reducer";
 import { Preloader } from "common/components/Preloader/Preloader";
-import { selectIsInitialized } from "../fuetures/auth/model/authSelectors";
-import { selectAppStatus } from "./model/selectAppError";
-
+import { selectAppError, selectAppStatus, setAppError, setIsLoggedIn } from "./model/appSlice";
+import { useMeQuery } from "../fuetures/auth/api/auth-api";
+import { useToast } from "common/components/Toast/ToastContainer";
+import { ResultCode } from "common/enums/resultCodeEnum";
 
 
 export const App = () => {
   const status = useAppSelector(selectAppStatus);
-  const isInitialized = useAppSelector(selectIsInitialized);
+  const [isInitialized, setIsInitialized] = useState(false);
   const dispatch = useAppDispatch();
-
+  const appError = useAppSelector(selectAppError);
+  const toast = useToast();
+  if (appError) {
+    toast.error(appError, "left-bottom", () => {
+      dispatch(setAppError({ error: null }));
+    });
+  }
+  const { data, isLoading } = useMeQuery();
   useEffect(() => {
-    dispatch(initializeAppTC());
-  }, []);
+    if (!isLoading) {
+      setIsInitialized(true);
+      if (data?.resultCode === ResultCode.Success) {
+        dispatch(setIsLoggedIn({ isLoggedIn: true }));
+      }
+    }
+  }, [isLoading, data, status]);
 
   return (
+
     <div>
 
       {!isInitialized ? <Preloader /> : <>
         <Header />
-        {status === "loading" && <LinearProgress color={"primary"} style={{
-          position: "fixed",
-          top: "30",
-          left: "0",
-          width: "100%",
-          height: "4px",
-          zIndex: "9999"
-        }} />}
         <Outlet />
       </>}
     </div>
