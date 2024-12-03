@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { Toast } from "common/components/Toast/Toast";
+import { createContext, ReactNode, useEffect, useState } from "react";
+import { Toast } from "common/components/Toast/ui/Toast";
 
 export type SideTypes = "left-top" | "right-top" | "right-bottom" | "left-bottom"
 export type ToastContainerProps = {
@@ -24,23 +24,21 @@ export const ToastContext = createContext<ToastContextType>({
   }
 });
 
-export const useToast = () => {
-  return useContext(ToastContext);
-};
-
 export const ToastContainer = ({ children }: ToastContainerProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [side, setSide] = useState<SideTypes>("left-top");
+  const [side, setSide] = useState<SideTypes>("left-bottom");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [timerDelay, setTimerDelay] = useState(3000);
   const [progress, setProgress] = useState(100);
   const [toastType, setToastType] = useState<ToastType>("success");
-
+  const [onCloseCallback, setOnCloseCallback] = useState<(() => void) | null>(null);
+  const handleClose = () => {
+    setIsOpen(false);
+  };
   const showMessage: showMessageMethodType = (message,
                                               side,
                                               onClose,
-                                              delay = timerDelay,
-                                              type: ToastType = "success"
+                                              delay = timerDelay
   ) => {
     setTimeout(() => {
       setIsOpen(true);
@@ -48,25 +46,23 @@ export const ToastContainer = ({ children }: ToastContainerProps) => {
       if (delay) {
         setTimerDelay(delay);
       }
-      if (type) {
-        setToastType(type);
-      }
       if (side) {
         setSide(side);
       }
       if (onClose) {
-        setTimeout(onClose, 3000);
+        setOnCloseCallback(onClose);
       }
     }, 0);
   };
   useEffect(() => {
     if (isOpen && toastMessage) {
+      window.addEventListener("mousedown", handleClose);
       const interval = timerDelay / 100;
       const timer = setInterval(() => {
         setProgress((prevProgress) => {
           if (prevProgress <= 1) {
             clearInterval(timer);
-            setIsOpen(false);
+            handleClose();
             return 0;
           }
           return prevProgress - 1;
@@ -75,11 +71,14 @@ export const ToastContainer = ({ children }: ToastContainerProps) => {
 
       return () => {
         clearInterval(timer);
+        window.removeEventListener("mousedown", handleClose);
       };
 
     }
-    return () => setProgress(100);
-  }, [isOpen, toastMessage, progress, timerDelay]);
+    return () => {
+      setProgress(100);
+    };
+  }, [isOpen, toastMessage, progress, timerDelay, onCloseCallback]);
   const error: showMessageMethodType = (message, side, onClose, delay) => {
     setToastType("error");
     showMessage(message, side, onClose, delay);
