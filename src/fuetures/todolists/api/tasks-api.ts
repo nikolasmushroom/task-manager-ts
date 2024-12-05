@@ -1,5 +1,5 @@
-import { baseURL } from "common/instance"
-import { BaseResponse } from "common/types"
+import { BaseResponse } from "common/types";
+import { baseApi } from "../../../app/model/base-api";
 
 export type GetTaskResponse = {
   totalCount: number
@@ -33,10 +33,7 @@ export enum TaskStatus {
   part,
   done,
 }
-export enum ResultCode {
-  Success,
-  Failed,
-}
+
 export enum TodoTaskPriority {
   low,
   middle,
@@ -44,29 +41,48 @@ export enum TodoTaskPriority {
   urgently,
   later,
 }
+export const PAGE_SIZE = 4;
 
-export const taskAPI = {
-  getTasks(todolistId: string) {
-    return baseURL.get<GetTaskResponse>(`/todo-lists/${todolistId}/tasks`).then((response) => {
-      return response
+export const taskApi = baseApi.injectEndpoints({
+  endpoints: build => ({
+    getTasks: build.query<GetTaskResponse, { todolistId: string; args: {page: number} }>({
+      query: ({ todolistId, args }) => {
+        const params = {...args, count : PAGE_SIZE}
+        return {
+          url: `/todo-lists/${todolistId}/tasks`,
+          params: params
+        }
+
+      },
+      providesTags: (res, error, { todolistId }) =>
+        res
+          ? [...res.items.map(({ id }) => ({ type: "Task", id }) as const), { type: "Task", id: todolistId }]
+          : ["Task"]
+
+    }),
+    addTask: build.mutation<BaseResponse, { todolistId: string; title: string }>({
+      query: ({ todolistId, title }) => ({
+        url: `/todo-lists/${todolistId}/tasks`,
+        method: "POST",
+        body: { title }
+      }),
+      invalidatesTags: (res, error, { todolistId }) => [{ type: "Task", id: todolistId }]
+    }),
+    removeTask: build.mutation<BaseResponse, { todolistId: string; taskId: string }>({
+      query: ({ todolistId, taskId }) => ({
+        url: `/todo-lists/${todolistId}/tasks/${taskId}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: (res, error, { taskId }) => [{ type: "Task", id: taskId }]
+    }),
+    updateTask: build.mutation<BaseResponse, { todolistId: string; taskId: string; model: UpdateTaskModel }>({
+      query: ({ todolistId, taskId, model }) => ({
+        url: `/todo-lists/${todolistId}/tasks/${taskId}`,
+        method: "PUT",
+        body: model
+      }),
+      invalidatesTags: (res, error, { taskId }) => [{ type: "Task", id: taskId }]
     })
-  },
-  createTask(params: { todolistId: string; title: string }) {
-    const { todolistId, title } = params
-    return baseURL.post<BaseResponse<{ item: TaskType }>>(`/todo-lists/${todolistId}/tasks`, { title: title }, {}).then((response) => {
-      return response
-    })
-  },
-  deleteTask(params: { todolistId: string; taskId: string }) {
-    const { todolistId, taskId } = params
-    return baseURL.delete<BaseResponse>(`/todo-lists/${todolistId}/tasks/${taskId}`).then((response) => {
-      return response
-    })
-  },
-  updateTask(params: { todolistId: string; taskId: string; apiModel: UpdateTaskModel }) {
-    const { todolistId, taskId, apiModel } = params
-    return baseURL.put<BaseResponse<{ item: TaskType }>>(`/todo-lists/${todolistId}/tasks/${taskId}`, apiModel).then((response) => {
-      return response
-    })
-  },
-}
+  })
+});
+export const { useGetTasksQuery, useAddTaskMutation, useRemoveTaskMutation, useUpdateTaskMutation } = taskApi;
