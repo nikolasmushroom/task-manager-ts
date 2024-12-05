@@ -29,7 +29,7 @@ export const useTodolistTitle = (todolist : TodolistDomainType) => {
           updateQueryData("failed");
         }
       })
-      .catch((error) => {
+      .catch(() => {
         updateQueryData("failed");
       });
   };
