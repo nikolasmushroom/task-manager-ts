@@ -8,30 +8,19 @@ export const IconButton: React.FC<ButtonPropsType & {
   height?: string,
   style?: React.CSSProperties
 }> = ({
-        xType,
         iconUrl,
         width = "25px",
         height = "25px",
-        className,
         disabled,
         style,
-        ...restProps // все остальные пропсы попадут в объект restProps, там же будет children
+        ...restProps
       }) => {
-  const finalClassName = s.button
-    + (disabled
-        ? " " + s.disabled
-        : xType === "red"
-          ? " " + s.red
-          : xType === "secondary"
-            ? " " + s.secondary
-            : " " + s.default
-    ) + (className ? " " + className : "");
+
   return (
     <Button style={{
       background: "none",
       border: "none"
     }} disabled={disabled}
-            className={finalClassName}
             {...restProps}>
       <img style={{ width, height }} src={iconUrl} alt="icon" />
     </Button>
